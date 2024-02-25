@@ -16,13 +16,13 @@ class Player:
             y = 1300 - 100 * self.position
         elif self.position < 20:
             x = 100 + 100 * (self.position - 10)
-            y = 250
-        elif self.position < 30:
-            x = 1400
-            y = 1300 + 100 * (self.position - 20)
-        else:
-            x = 1000 - 100 * (self.position - 30)       
             y = 100
+        elif self.position < 30:
+            x = 1300
+            y = 100 + 100 * (self.position - 20)
+        else:
+            x = 1300 - 100 * (self.position - 30)       
+            y = 1300
         #print(x,y)
         return (x,y)
 
