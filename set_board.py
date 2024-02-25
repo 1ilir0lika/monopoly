@@ -1,7 +1,7 @@
 import classi
 players=[
             classi.Player("Elon Musk jr", 30,1000,0,"us"),
-            classi.Player("Mario Rossi", 30,1000,0,"it"),
+            classi.Player("Roberto Dettobene", 30,1000,0,"it"),
             classi.Player("Ilir Lika", 30,1000,0,"al"),
             classi.Player("Lee Shang", 30,1000,0,"nk"),
             classi.Player("Abu Bakr", 30,1000,0,"bur"),
