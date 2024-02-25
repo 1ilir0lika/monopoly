@@ -1,8 +1,6 @@
 import pygame
 import sys
 from pygame.locals import *
-import random
-import classi
 import functions
 import set_board
 # Initialize Pygame
@@ -51,10 +49,6 @@ while game_running:
     screen.fill((0, 128, 0), (0, 0, width_window, height_window))
     # Display the game board
     screen.blit(board, (25, 25))
-    #add image it.png inside the game window
-    it = pygame.image.load('it.png')
-    it = pygame.transform.scale(it, (100, 70))
-    screen.blit(it, (100,1300))
     # Display the title of the game
     font = pygame.font.SysFont('Times New Roman', 150)
     text = font.render('MONOPOLY', True, (255, 255, 255))
@@ -67,9 +61,7 @@ while game_running:
     pygame.display.update()
     # Clear the screen for the next iteration
     screen.fill((0, 128, 0), (0, 0, width_window, height_window))
-    # Add 500 to Elon Musk jr every second
-    set_board.players[0].cash += 500
     # Move the player
     functions.move_player(set_board.players[0])
-    # Delay for 500 milliseconds
+    # Delay 
     pygame.time.delay(1000)  # Use pygame.time.delay instead of time.sleep
