@@ -1,4 +1,17 @@
 import classi
+import pygame
+width_game, height_game = 1400, 1400
+width_window, height_window = 3000, 1500
+# Set the caption for the game window
+pygame.display.set_caption("Monopoly")
+# Load the image from the specified file path
+board = pygame.image.load('bg.png')
+board = pygame.transform.scale(board, (width_game, height_game))
+# Open screen as full screen
+screen = pygame.display.set_mode((width_window, height_window), pygame.FULLSCREEN)
+# Flag to control the game loop
+game_running = True
+# Function that displays the stats of the board.players aligning their names even if they have different lengths
 players=[
             classi.Player("Elon Musk jr", 30,1000,0,"us"),
             classi.Player("Roberto Dettobene", 30,1000,0,"it"),
