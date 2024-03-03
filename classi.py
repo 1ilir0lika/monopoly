@@ -1,4 +1,5 @@
 from enum import Enum
+import pygame
 # Class that represents a player
 class Player:
     def __init__(self, name, age,cash,position,flag):
@@ -75,3 +76,47 @@ class BoardPosition(Enum):
     IMPREVISTO = "IMPREVISTO"
     PROBABILITA = "PROBABILITA" 
 
+class Button():
+    def __init__(self, x, y, width, height, buttonText, Pressed=False):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.Pressed = Pressed
+        self.alreadyPressed = False
+        self.buttonText = buttonText
+
+        self.fillColors = {
+            'normal': '#ffffff',
+            'hover': '#666666',
+            'pressed': '#333333',
+        }
+        self.buttonSurface = pygame.Surface((self.width, self.height))
+        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+    def draw(self, screen):
+        self.buttonSurface = pygame.Surface((self.width, self.height))
+        self.buttonSurface.fill(self.fillColors['normal'])
+        self.buttonRect = self.buttonSurface.get_rect(topleft=(self.x, self.y))
+        screen.blit(self.buttonSurface, self.buttonRect)
+        text = pygame.font.Font(None, 36).render(self.buttonText, True, (0, 0, 0))
+        textRect = text.get_rect(center=self.buttonRect.center)
+        screen.blit(text, textRect)
+        pygame.draw.rect(screen, (0, 0, 0), self.buttonRect, 2)
+        self.process()
+        
+    # Function that makes the button change color when the mouse is over it and change the value of the Pressed attribute
+    def process(self):
+        mousePos = pygame.mouse.get_pos()
+        self.buttonSurface.fill(self.fillColors['normal'])
+        if self.buttonRect.collidepoint(mousePos):
+            self.buttonSurface.fill(self.fillColors['hover'])
+            if pygame.mouse.get_pressed(num_buttons=3)[0]:
+                self.buttonSurface.fill(self.fillColors['pressed'])
+                if self.onePress:
+                    self.onclickFunction()
+                elif not self.Pressed:
+                    self.onclickFunction()
+                    self.Pressed = True
+            else:
+                self.alreadyPressed = False
