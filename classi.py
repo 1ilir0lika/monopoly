@@ -11,18 +11,20 @@ class Player:
         self.jail = False
     # Function that returns the position of the flag on the board    
     def flag_position(self):  
+        #max=1300
+        #min=100
         if self.position < 10:
-            x = 100
-            y = 1300 - 100 * self.position
-        elif self.position < 20:
-            x = 100 + 100 * (self.position - 10)
-            y = 100
-        elif self.position < 30:
-            x = 1300
-            y = 100 + 100 * (self.position - 20)
-        else:
-            x = 1300 - 100 * (self.position - 30)       
+            x = 1300 - 100 * self.position
             y = 1300
+        elif self.position < 20:
+            x = 100
+            y = 1300 - 100 * (self.position - 10)
+        elif self.position < 30:
+            x = 100 + 100 * (self.position - 20)
+            y = 100
+        else:
+            x = 1300   
+            y = 100 + 100 * (self.position - 30)
         #print(x,y)
         return (x,y)
 
@@ -49,6 +51,16 @@ class Imprevisto:
     def __init__(self, name, position):
         self.name = name
         self.position = position
+        #di quanto andare avanti o indietro
+        #self.rel_position=rel_position
+        ##dove andare
+        #self.absolute_position=absolute_position
+        ##somma relativa di soldi tolti o aggiunti
+        #self.rel_money=rel_money
+        ##somma assoluta di soldi tolti o aggiunti
+        #self.abs_money=abs_money
+        ##vai in prigione
+        #self.jail=jail
 #Class that represents a community chest
 class Probabilita:
     def __init__(self, name, position):
