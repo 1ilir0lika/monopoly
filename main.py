@@ -26,5 +26,4 @@ while set_board.game_running:
         functions.move_player(set_board.players[0])
         pygame.display.update()
 pygame.display.update()
-pygame.time.delay(1000)
 pygame.quit()
