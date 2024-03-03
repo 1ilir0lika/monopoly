@@ -3,6 +3,7 @@ from pygame.locals import *
 import classi
 import set_board
 import pygame
+import sys
 # Function that displays the players
 def display_players():
     for i in range(len(set_board.players)):
@@ -11,6 +12,10 @@ def display_players():
         set_board.screen.blit(player, set_board.players[i].flag_position())
 # Function that move the player based on a random dice roll
 def move_player(player):
+    if player.jail:
+        player.jail = False
+        #if the player is in jail he can't move
+        return
     dice = random.randint(1, 6)
     print("il dado ha fatto "+str(dice))
     player.position += dice
@@ -18,7 +23,6 @@ def move_player(player):
         player.position -= len(set_board.board_positions)
         player.cash += 200
     pygame.display.update()
-    pygame.time.delay(1000)
     print("la posizione é "+str(player.position))
     display_players()
     pygame.display.update()
@@ -32,21 +36,33 @@ def move_player(player):
                 font = pygame.font.Font('freesansbold.ttf', 90)
                 text = font.render(text, True, (0, 0, 0))
                 set_board.screen.blit(text, (50, 100))
-                button_si=classi.Button(100,300,100,100,"sí")
-                button_no=classi.Button(500,300,100,100,"no")
-                button_si.draw(set_board.screen)
-                button_no.draw(set_board.screen)
+                set_board.button_si.draw(set_board.screen)
+                set_board.button_no.draw(set_board.screen)
                 pygame.display.update()
+                #ask input by creating 2 cliccable buttons
+                #if the player clics on the yes button buy the property
                 while True:
-                    #ask input by creating 2 cliccable buttons
-                    button_si.process()
-                    button_no.process()
-                    #if the player clics on the yes button buy the property
-                    if button_si.Pressed:
-                        player.buy(set_board.board_positions[player.position])
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            pygame.quit()
+                            sys.exit()
+                    set_board.button_si.process()
+                    set_board.button_no.process()
+                    if set_board.button_si.Pressed or set_board.button_no.Pressed:
+                        #if not added it takes the input multiple times
+                        pygame.time.wait(250)
+                        break
+                if set_board.button_si.Pressed:
+                    #print("é stato premuto il bottone sí")
+                    set_board.board_positions[player.position].buy(player)
+                    player.properties.append(set_board.board_positions[player.position].name)
+                    set_board.button_si.Pressed = False
+                    pass
                     #if the player clics on the no button do nothing
-                    elif button_no.Pressed:
-                        pass
+                elif set_board.button_no.Pressed:
+                    #print("é stato premuto il bottone no")
+                    set_board.button_no.Pressed = False
+                    pass
             else:
                 print("Devi pagare "+str(set_board.board_positions[player.position].rent)+" a "+set_board.board_positions[player.position].owner)
                 for i in range(len(set_board.players)):
@@ -66,13 +82,14 @@ def move_player(player):
             player.position = 10
         case _:
             print("Non é possibile fare nulla")
-    # Delay 
-    pygame.time.delay(1000)  # Use pygame.time.delay instead of time.sleep
 # Function that displays the stats of the board.players aligning their names even if they have different lengths
-def display_stats():
+def display_stats(current_player):
     font = pygame.font.Font('freesansbold.ttf', 90)
     for i in range(len(set_board.players)):
         name = set_board.players[i].name
+        if set_board.players[i] == current_player:
+            print("ora sta giocando "+current_player.name)
+            name = name + "*"
         cash = set_board.players[i].cash
         #flag of the player use png with the name of the flag
         flag = pygame.image.load(set_board.players[i].flag + '.png')
