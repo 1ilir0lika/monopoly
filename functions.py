@@ -32,20 +32,20 @@ def move_player(player):
                 font = pygame.font.Font('freesansbold.ttf', 90)
                 text = font.render(text, True, (0, 0, 0))
                 set_board.screen.blit(text, (50, 100))
-                #ask input by creating 2 cliccable buttons
                 button_si=classi.Button(100,300,100,100,"sí")
                 button_no=classi.Button(500,300,100,100,"no")
                 button_si.draw(set_board.screen)
                 button_no.draw(set_board.screen)
-                button_si.process()
-                button_no.process()
                 pygame.display.update()
-                #if the player clics on the yes button buy the property
                 while True:
+                    #ask input by creating 2 cliccable buttons
+                    button_si.process()
+                    button_no.process()
+                    #if the player clics on the yes button buy the property
                     if button_si.Pressed:
                         player.buy(set_board.board_positions[player.position])
                     #if the player clics on the no button do nothing
-                    if button_no.Pressed:
+                    elif button_no.Pressed:
                         pass
             else:
                 print("Devi pagare "+str(set_board.board_positions[player.position].rent)+" a "+set_board.board_positions[player.position].owner)
@@ -76,9 +76,9 @@ def display_stats():
         cash = set_board.players[i].cash
         #flag of the player use png with the name of the flag
         flag = pygame.image.load(set_board.players[i].flag + '.png')
-        flag = pygame.transform.scale(flag, (150, 100))
-        set_board.screen.blit(flag, (set_board.width_game + set_board.width_window / 5, 400 + 200 * i))
-        text = font.render(name + " " + str(cash) + " ", True, (255, 255, 255))
+        flag = pygame.transform.scale(flag, (100, 70))
+        set_board.screen.blit(flag, (set_board.width_game + set_board.width_window / 5, 450 + 200 * i))
+        text = font.render(name + " " + str(cash)+"$" + " ", True, (255, 255, 255))
         text_rect = text.get_rect()
         text_rect.center = (set_board.width_game + set_board.width_window / 5, 400 + 200 * i)
         set_board.screen.blit(text, text_rect)
