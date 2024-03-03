@@ -79,4 +79,4 @@ def display_stats():
         text = font.render(name + " " + str(cash) + " ", True, (255, 255, 255))
         text_rect = text.get_rect()
         text_rect.center = (set_board.width_game + set_board.width_window / 5, 400 + 200 * i)
-        set_board.screen.blit(text, text_rect
+        set_board.screen.blit(text, text_rect)
