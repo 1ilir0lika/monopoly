@@ -71,7 +71,7 @@ def move_player(player):
                         player.cash -= set_board.board_positions[player.position].rent
         case classi.Imprevisto:
             print("Hai pescato una carta imprevisto")
-            probabilita = set_board.probabilita[random.randint(1, len(set_board.probabilita))]
+            probabilita = set_board.probabilita[random.randint(1, len(set_board.probabilita)-1)]
             font = pygame.font.Font('freesansbold.ttf', 90)
             text = font.render(probabilita, True, (0, 0, 0))
             #set background and show the text
@@ -93,14 +93,13 @@ def move_player(player):
             pygame.display.update()
         case classi.Probabilita:
             print("Hai pescato una carta probabilità")
-            imprevisto = set_board.imprevisti[random.randint(1, len(set_board.imprevisti))]
+            imprevisto = set_board.imprevisti[random.randint(1, len(set_board.imprevisti)-1)]
             font = pygame.font.Font('freesansbold.ttf', 90)
             text = font.render(imprevisto, True, (0, 0, 0))
             #set background and show the text
             set_board.screen.fill((0, 128, 0), (0, 0, set_board.width_window, set_board.height_window))
             #wrap the text
             set_board.screen.blit(text, (50, 800))
-            set_board.screen.draw
             set_board.button_fatto.draw(set_board.screen)
             pygame.display.update()
             while True:
