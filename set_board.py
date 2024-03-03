@@ -9,6 +9,11 @@ board = pygame.image.load('bg.png')
 board = pygame.transform.scale(board, (width_game, height_game))
 # Open screen as full screen
 screen = pygame.display.set_mode((width_window, height_window), pygame.FULLSCREEN)
+# Set background color
+screen.fill((0, 128, 0), (0, 0, width_window, height_window))
+# Display the game board
+screen.blit(board, (25, 25))
+pygame.display.update()
 # Flag to control the game loop
 game_running = True
 # Function that displays the stats of the board.players aligning their names even if they have different lengths
