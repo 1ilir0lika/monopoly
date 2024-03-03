@@ -9,20 +9,25 @@ board = pygame.image.load('bg.png')
 board = pygame.transform.scale(board, (width_game, height_game))
 # Open screen as full screen
 screen = pygame.display.set_mode((width_window, height_window), pygame.FULLSCREEN)
+#screen = pygame.display.set_mode((width_window, height_window))
 # Set background color
 screen.fill((0, 128, 0), (0, 0, width_window, height_window))
 # Display the game board
 screen.blit(board, (25, 25))
 pygame.display.update()
+button_si=classi.Button(300,300,150,100,"sí")
+button_no=classi.Button(1000,300,150,100,"no")
+button_si.process()
+button_no.process()
 # Flag to control the game loop
 game_running = True
 # Function that displays the stats of the board.players aligning their names even if they have different lengths
 players=[
-            classi.Player("Elon Musk jr", 30,1000,0,"us"),
-            classi.Player("Roberto Dettobene", 30,1000,0,"it"),
-            classi.Player("Ilir Lika", 30,1000,0,"al"),
-            classi.Player("Lee Shang", 30,1000,0,"nk"),
-            classi.Player("Abu Bakr", 30,1000,0,"bur"),
+            classi.Player("Elon Musk jr", 20000,0,"us"),
+            classi.Player("Roberto Dettobene", 7000,0,"it"),
+            classi.Player("Ilir Lika", 500,0,"al"),
+            classi.Player("Lee Shang", 40,0,"nk"),
+            classi.Player("Abu Bakr", 5,0,"bur"),
         ]
 board_positions = [
     classi.Property("Via", 0, 0,0),
