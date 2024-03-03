@@ -2,9 +2,8 @@ from enum import Enum
 import pygame
 # Class that represents a player
 class Player:
-    def __init__(self, name, age,cash,position,flag):
+    def __init__(self, name,cash,position,flag):
         self.name = name
-        self.age = age
         self.cash = cash
         self.position = position
         self.flag = flag
@@ -108,7 +107,6 @@ class Button():
     # Function that makes the button change color when the mouse is over it and change the value of the Pressed attribute
     def process(self):
         mousePos = pygame.mouse.get_pos()
-        print(mousePos)
         self.buttonSurface.fill(self.fillColors['normal'])
         if self.buttonRect.collidepoint(mousePos):
             self.buttonSurface.fill(self.fillColors['hover'])
