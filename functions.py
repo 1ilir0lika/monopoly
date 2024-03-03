@@ -2,7 +2,7 @@ import random
 from pygame.locals import *
 import classi
 import set_board
-import pygame
+import pygame 
 import sys
 # Function that displays the players
 def display_players():
@@ -71,15 +71,56 @@ def move_player(player):
                         player.cash -= set_board.board_positions[player.position].rent
         case classi.Imprevisto:
             print("Hai pescato una carta imprevisto")
+            probabilita = set_board.probabilita[random.randint(1, len(set_board.probabilita))]
+            font = pygame.font.Font('freesansbold.ttf', 90)
+            text = font.render(probabilita, True, (0, 0, 0))
+            #set background and show the text
+            set_board.screen.fill((0, 128, 0), (0, 0, set_board.width_window, set_board.height_window))
+            set_board.screen.blit(text, (50, 800))
+            set_board.button_fatto.draw(set_board.screen)
+            pygame.display.update()
+            while True:
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            pygame.quit()
+                            sys.exit()
+                    set_board.button_fatto.process()
+                    if set_board.button_fatto.Pressed:
+                        #if not added it takes the input multiple times
+                        pygame.time.wait(250)
+                        set_board.button_fatto.Pressed = False
+                        break
+            pygame.display.update()
         case classi.Probabilita:
             print("Hai pescato una carta probabilità")
+            imprevisto = set_board.imprevisti[random.randint(1, len(set_board.imprevisti))]
+            font = pygame.font.Font('freesansbold.ttf', 90)
+            text = font.render(imprevisto, True, (0, 0, 0))
+            #set background and show the text
+            set_board.screen.fill((0, 128, 0), (0, 0, set_board.width_window, set_board.height_window))
+            #wrap the text
+            set_board.screen.blit(text, (50, 800))
+            set_board.screen.draw
+            set_board.button_fatto.draw(set_board.screen)
+            pygame.display.update()
+            while True:
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            pygame.quit()
+                            sys.exit()
+                    set_board.button_fatto.process()
+                    if set_board.button_fatto.Pressed:
+                        #if not added it takes the input multiple times
+                        pygame.time.wait(250)
+                        set_board.button_fatto.Pressed = False
+                        break
+            pygame.display.update()
         case classi.Tax:
             print("Devi pagare "+str(set_board.board_positions[player.position].amount)+" di tasse")
             player.cash -= set_board.board_positions[player.position].amount
         case classi.Jail:
             print("Sei in prigione")
             player.jail = True
-            player.position = 10
         case _:
             print("Non é possibile fare nulla")
 # Function that displays the stats of the board.players aligning their names even if they have different lengths
