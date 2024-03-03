@@ -20,6 +20,8 @@ def move_player(player):
     pygame.display.update()
     pygame.time.delay(1000)
     print("la posizione é "+str(player.position))
+    display_players()
+    pygame.display.update()
     #match the type of the position and do the corresponding action
     match type(set_board.board_positions[player.position]):
         case classi.Property:
@@ -28,7 +30,7 @@ def move_player(player):
                 #ask wheter the player wants to buy the property using the buy method graphically
                 text= "Vuoi comprare "+set_board.board_positions[player.position].name+" per "+str(set_board.board_positions[player.position].price)+"?"
                 font = pygame.font.Font('freesansbold.ttf', 90)
-                text = font.render(text, True, (255, 255, 255))
+                text = font.render(text, True, (0, 0, 0))
                 set_board.screen.blit(text, (50, 100))
                 #ask input by creating 2 cliccable buttons
                 button_si=classi.Button(100,300,100,100,"sí")
@@ -80,3 +82,4 @@ def display_stats():
         text_rect = text.get_rect()
         text_rect.center = (set_board.width_game + set_board.width_window / 5, 400 + 200 * i)
         set_board.screen.blit(text, text_rect)
+        pygame.display.update()
