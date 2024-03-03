@@ -76,14 +76,14 @@ class BoardPosition(Enum):
     IMPREVISTO = "IMPREVISTO"
     PROBABILITA = "PROBABILITA" 
 
+
 class Button():
-    def __init__(self, x, y, width, height, buttonText, Pressed=False):
+    def __init__(self, x, y, width, height, buttonText):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.Pressed = Pressed
-        self.alreadyPressed = False
+        self.Pressed = False
         self.buttonText = buttonText
 
         self.fillColors = {
@@ -108,15 +108,12 @@ class Button():
     # Function that makes the button change color when the mouse is over it and change the value of the Pressed attribute
     def process(self):
         mousePos = pygame.mouse.get_pos()
+        print(mousePos)
         self.buttonSurface.fill(self.fillColors['normal'])
         if self.buttonRect.collidepoint(mousePos):
             self.buttonSurface.fill(self.fillColors['hover'])
+            pygame.display.update()
             if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.buttonSurface.fill(self.fillColors['pressed'])
-                if self.onePress:
-                    self.onclickFunction()
-                elif not self.Pressed:
-                    self.onclickFunction()
-                    self.Pressed = True
-            else:
-                self.alreadyPressed = False
+                pygame.display.update()
+                self.Pressed = True
