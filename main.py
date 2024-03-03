@@ -15,10 +15,6 @@ while set_board.game_running:
         set_board.screen.fill((0, 128, 0), (0, 0, set_board.width_window, set_board.height_window))
         # Display the game board
         set_board.screen.blit(set_board.board, (25, 25))
-        #add image it.png inside the game window
-        it = pygame.image.load('it.png')
-        it = pygame.transform.scale(it, (100, 70))
-        set_board.screen.blit(it, (100,1300))
         # Display the title of the game
         font = pygame.font.SysFont('Times New Roman', 150)
         text = font.render('MONOPOLY', True, (255, 255, 255))
