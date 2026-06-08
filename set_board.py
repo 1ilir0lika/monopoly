@@ -2,29 +2,32 @@ import classi
 import pygame
 
 # ---------------------------------------------------------------------------
-# Display setup – auto-detect screen resolution
+# Display setup – fixed size for WebAssembly / Pygbag
 # ---------------------------------------------------------------------------
 pygame.init()
-info = pygame.display.Info()
-width_window  = info.current_w
-height_window = info.current_h
 
-# Board occupies the left portion; sidebar takes the rest
+# Fixed resolution – works in browser iframe and desktop
+WINDOW_W = 1280
+WINDOW_H = 720
+
 board_margin   = 20
-board_size     = min(height_window - board_margin * 2, int(width_window * 0.60))
+board_size     = min(WINDOW_H - board_margin * 2, int(WINDOW_W * 0.60))
 board_x        = board_margin
-board_y        = (height_window - board_size) // 2
+board_y        = (WINDOW_H - board_size) // 2
 
 sidebar_x      = board_x + board_size + board_margin * 2
-sidebar_width  = width_window - sidebar_x - board_margin
+sidebar_width  = WINDOW_W - sidebar_x - board_margin
 width_game     = board_size   # kept for legacy compat
+width_window   = WINDOW_W
+height_window  = WINDOW_H
 
 pygame.display.set_caption("Monopoly")
 
 board_img = pygame.image.load('bg.png')
 board_img = pygame.transform.scale(board_img, (board_size, board_size))
 
-screen = pygame.display.set_mode((width_window, height_window), pygame.FULLSCREEN)
+# No FULLSCREEN – not supported by Pygbag/WebAssembly
+screen = pygame.display.set_mode((WINDOW_W, WINDOW_H))
 screen.fill((0, 100, 50))
 screen.blit(board_img, (board_x, board_y))
 pygame.display.update()
@@ -33,11 +36,11 @@ pygame.display.update()
 # Buttons – positioned relative to board/sidebar
 # ---------------------------------------------------------------------------
 btn_w, btn_h = max(160, sidebar_width // 3), 55
-btn_y_base   = height_window // 2
+btn_y_base   = WINDOW_H // 2
 
-button_si    = classi.Button(board_x + board_size // 4 - btn_w // 2,  btn_y_base, btn_w, btn_h, "Sí  ✓")
-button_no    = classi.Button(board_x + 3 * board_size // 4 - btn_w // 2, btn_y_base, btn_w, btn_h, "No  ✗")
-button_fatto = classi.Button(board_x + board_size // 2 - btn_w // 2,  btn_y_base + 80, btn_w, btn_h, "Fatto ✓")
+button_si    = classi.Button(board_x + board_size // 4 - btn_w // 2,  btn_y_base, btn_w, btn_h, "Si  v")
+button_no    = classi.Button(board_x + 3 * board_size // 4 - btn_w // 2, btn_y_base, btn_w, btn_h, "No  x")
+button_fatto = classi.Button(board_x + board_size // 2 - btn_w // 2,  btn_y_base + 80, btn_w, btn_h, "Fatto v")
 
 game_running = True
 
@@ -99,14 +102,13 @@ board_positions = [
 ]
 
 # ---------------------------------------------------------------------------
-# Card texts  (note: swapped from original – imprevisti = Chance,
-# probabilita = Community Chest)
+# Card texts
 # ---------------------------------------------------------------------------
 imprevisti = [
     "Vivi in Senegal e il Presidente ha annullato le elezioni democratiche. "
-    "Dakar è in subbuglio, il 4G non funziona e non puoi muoverti. Salti un turno.",
+    "Dakar e' in subbuglio, il 4G non funziona e non puoi muoverti. Salti un turno.",
 
-    "Il vulcano Grindavick è eruttato mentre ti trovi nei paraggi. "
+    "Il vulcano Grindavick e' eruttato mentre ti trovi nei paraggi. "
     "Indietreggia di 2 caselle per evitare la lava!",
 
     "Arrivato in Libia nascosto su un camion, vieni scoperto e espulso. "
@@ -129,12 +131,12 @@ imprevisti = [
     "Sei un sans-papier al porto di Calais e vieni fermato dalla Gendarmerie. "
     "Vai in prigione per due turni.",
 
-    "Blocco del traffico per qualità dell'aria pessima. Stai fermo un turno.",
+    "Blocco del traffico per qualita' dell'aria pessima. Stai fermo un turno.",
 
     "Hanno aumentato la TARI. Dai il 10% del tuo patrimonio alla cassa.",
 
     "Hanno aumentato la tassa sull'energia. "
-    "Dai 1 caramella per ogni proprietà che possiedi.",
+    "Dai 1 caramella per ogni proprieta' che possiedi.",
 
     "Tua moglie ha chiesto il divorzio. "
     "Non puoi saldare il contratto prematrimoniale: finisci in prigione per un turno.",
@@ -159,18 +161,18 @@ probabilita = [
     "La Melissa & Bill Gates Foundation chiede di finanziare la tua idea di WC senz'acqua. "
     "Come la presenti?",
 
-    "La banca vuole finanziarti ma hai solo 100€, nessuna proprietà e una laurea in economia. "
+    "La banca vuole finanziarti ma hai solo 100 euro, nessuna proprieta' e una laurea in economia. "
     "Come la convinci?",
 
-    "Vuoi giocare in Borsa e devi dimostrare le tue qualità matematiche. Risolvi!",
+    "Vuoi giocare in Borsa e devi dimostrare le tue qualita' matematiche. Risolvi!",
 
     "Hai vinto una borsa di studio grazie ai tuoi meriti. Avanza di 3 caselle.",
 
-    "Un colloquio di lavoro: devi convincere in inglese il cliente delle potenzialità dei pannelli fotovoltaici.",
+    "Un colloquio di lavoro: devi convincere in inglese il cliente delle potenzialita' dei pannelli fotovoltaici.",
 
-    "Ti hanno notato per le tue qualità atletiche. "
+    "Ti hanno notato per le tue qualita' atletiche. "
     "Per entrare nella squadra olimpionica devi fare 40 flessioni in 60 secondi.",
 
-    "Come avvocato, devi difendere la tesi: ogni uomo e donna è uguale davanti alla legge "
-    "e deve avere le stesse opportunità.",
+    "Come avvocato, devi difendere la tesi: ogni uomo e donna e' uguale davanti alla legge "
+    "e deve avere le stesse opportunita'.",
 ]
