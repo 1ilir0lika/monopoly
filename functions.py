@@ -462,6 +462,7 @@ def _apply_card_effect(player, effect):
 
     if effect.get("jail"):
         player.jail = True
+        player.position = 10   # cella Jail (IN PRIGIONE)
         msgs.append("Vai in prigione! Salti il prossimo turno.")
 
     if effect.get("skip") and not effect.get("jail"):
@@ -506,6 +507,83 @@ def _apply_card_effect(player, effect):
         msgs.append(f"Perdi {abs(effect['candy_per_prop'])} caramella x {n} proprieta' = {abs(total)}$.")
 
     return " ".join(msgs)
+
+
+# ---------------------------------------------------------------------------
+# Jail animation  –  async
+# ---------------------------------------------------------------------------
+
+async def _animate_jail(player):
+    """
+    Dramatic jail sequence:
+    1. Screen flashes red-orange 3 times
+    2. Thick bars slide down from the top covering the board
+    3. Overlay card appears with the prison message
+    """
+    bx, by = set_board.board_x, set_board.board_y
+    bs     = set_board.board_size
+    screen = set_board.screen
+
+    # --- Phase 1: red flash ---
+    for i in range(6):
+        _base_redraw(player)
+        if i % 2 == 0:
+            flash = pygame.Surface((bs, bs), pygame.SRCALPHA)
+            flash.fill((200, 30, 30, 140))
+            screen.blit(flash, (bx, by))
+        pygame.display.update()
+        await asyncio.sleep(0.07)
+
+    # --- Phase 2: bars slide down ---
+    bar_color      = (30, 30, 35)
+    bar_highlight  = (80, 80, 90)
+    n_bars         = 7
+    bar_w          = max(10, bs // 28)
+    gap            = (bs - n_bars * bar_w) // (n_bars + 1)
+
+    # Dark overlay behind bars
+    overlay = pygame.Surface((bs, bs), pygame.SRCALPHA)
+    overlay.fill((10, 5, 20, 180))
+
+    steps = 18
+    for step in range(steps + 1):
+        progress = step / steps          # 0.0 → 1.0  (ease-out)
+        eased    = 1 - (1 - progress) ** 3
+        bar_h    = int(bs * eased)
+
+        _base_redraw(player)
+        screen.blit(overlay, (bx, by))
+
+        for b in range(n_bars):
+            bbar_x = bx + gap + b * (bar_w + gap)
+            # bar body
+            pygame.draw.rect(screen, bar_color,
+                             (bbar_x, by, bar_w, bar_h), border_radius=4)
+            # highlight on left edge
+            pygame.draw.rect(screen, bar_highlight,
+                             (bbar_x, by, max(2, bar_w // 5), bar_h),
+                             border_radius=4)
+
+        # Horizontal cross-bars
+        for frac in [0.25, 0.55, 0.80]:
+            cross_y = by + int(bar_h * frac)
+            if cross_y > by + 4:
+                pygame.draw.rect(screen, bar_color,
+                                 (bx, cross_y, bs, max(6, bs // 40)))
+
+        pygame.display.update()
+        await asyncio.sleep(0.025)
+
+    # Brief pause with bars fully down
+    await asyncio.sleep(0.4)
+
+    # --- Phase 3: overlay card ---
+    await draw_overlay_card(
+        "IN PRIGIONE",
+        "Sei finito dietro le sbarre! Salti il prossimo turno.",
+        accent=(55, 35, 160),
+        icon_txt='[]'
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -557,6 +635,8 @@ async def move_player(player):
             await draw_overlay_card("IMPREVISTO", body, accent=(200, 65, 40), icon_txt='?!')
             _base_redraw(player)
             pygame.display.update()
+            if player.jail:
+                await _animate_jail(player)
 
         case classi.Probabilita:
             idx  = random.randint(0, len(set_board.probabilita) - 1)
@@ -566,6 +646,8 @@ async def move_player(player):
             await draw_overlay_card("PROBABILITA'", body, accent=(50, 110, 210), icon_txt='>>')
             _base_redraw(player)
             pygame.display.update()
+            if player.jail:
+                await _animate_jail(player)
 
         case classi.Tax:
             player.cash -= cell.amount
@@ -574,8 +656,10 @@ async def move_player(player):
 
         case classi.Jail:
             player.jail = True
-            await draw_overlay_card("PRIGIONE", "Sei finito in prigione! Salti il prossimo turno.",
-                              accent=(70, 55, 190), icon_txt='[]')
+            player.position = 10   # sposta fisicamente alla cella prigione
+            _base_redraw(player)
+            pygame.display.update()
+            await _animate_jail(player)
 
         case _:
             pass
