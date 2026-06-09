@@ -28,9 +28,12 @@ board_img = pygame.transform.scale(board_img, (board_size, board_size))
 
 # No FULLSCREEN – not supported by Pygbag/WebAssembly
 screen = pygame.display.set_mode((WINDOW_W, WINDOW_H))
-screen.fill((0, 100, 50))
+
+# Draw initial frame only after board image is ready — prevents the
+# Pygbag/WebGL stale-pixel glitch (the green square in the top-left corner).
+screen.fill((0, 90, 45))
 screen.blit(board_img, (board_x, board_y))
-pygame.display.update()
+pygame.display.flip()
 
 # ---------------------------------------------------------------------------
 # Buttons – positioned relative to board/sidebar

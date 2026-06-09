@@ -58,9 +58,26 @@ def _rr(surf, color, rect, r=12, alpha=None):
 
 def _base_redraw(current_player=None):
     """Redraw background + board + players + sidebar (no display.update)."""
-    set_board.screen.fill((0, 90, 45))
-    set_board.screen.blit(set_board.board_img,
-                          (set_board.board_x, set_board.board_y))
+    bg_col = (0, 90, 45)
+    set_board.screen.fill(bg_col)
+
+    # Explicitly repaint the 4 margin strips around the board so Pygbag/WASM
+    # never shows a stale framebuffer fragment in those areas.
+    bx = set_board.board_x
+    by = set_board.board_y
+    bs = set_board.board_size
+    sw = set_board.width_window
+    sh = set_board.height_window
+    for rect in [
+        pygame.Rect(0,       0,       bx,           sh),
+        pygame.Rect(0,       0,       sw,           by),
+        pygame.Rect(0,       by + bs, sw,           sh - by - bs),
+        pygame.Rect(bx + bs, 0,       sw - bx - bs, sh),
+    ]:
+        if rect.width > 0 and rect.height > 0:
+            pygame.draw.rect(set_board.screen, bg_col, rect)
+
+    set_board.screen.blit(set_board.board_img, (bx, by))
     display_players()
     _draw_sidebar(current_player)
 
@@ -418,38 +435,92 @@ async def _animate_dice(result):
 
 
 # ---------------------------------------------------------------------------
-# Card effect definitions
+# Card effect definitions  –  tiered by wealth
+# ---------------------------------------------------------------------------
+# Each entry is (card_text_index_in_set_board_list, effect_dict).
+# POOR  → players below the median cash  (harsh: jail, big % losses)
+# RICH  → players at/above the median    (light: % of large wealth, minor moves)
 # ---------------------------------------------------------------------------
 
-IMPREVISTO_EFFECTS = [
-    {"skip": True},                   # 0 – Senegal, salta un turno
-    {"move": -2},                     # 1 – Vulcano, indietro 2
-    {"move": -1},                     # 2 – Libia, indietro 1
-    {"jail": True},                   # 3 – Locuste, prigione 1 turno
-    {"skip": True},                   # 4 – Inondazione, bloccato 1 turno
-    {"cash_pct": -0.10},              # 5 – Goldman, perde 10%
-    {"skip": True},                   # 6 – Virus, salta un turno
-    {"move": -3},                     # 7 – Golpe, indietro 3
-    {"jail": True},                   # 8 – Calais, prigione 2 turni
-    {"skip": True},                   # 9 – Traffico, fermo 1 turno
-    {"cash_pct": -0.10},              # 10 – TARI, dai 10%
-    {"candy_per_prop": -1},           # 11 – Energia, 1/proprieta'
-    {"jail": True},                   # 12 – Divorzio, prigione
-    {"cash_abs": -10},                # 13 – Gas, paga 10
-    {"cash_abs": -10},                # 14 – Grano, paga 10
+# ── IMPREVISTI ──────────────────────────────────────────────────────────────
+IMPREVISTO_POOR = [
+    (3,  {"jail": True}),             # Locuste  → prigione
+    (8,  {"jail": True}),             # Calais   → prigione
+    (12, {"jail": True}),             # Divorzio → prigione
+    (0,  {"skip": True}),             # Senegal  → salta turno
+    (4,  {"skip": True}),             # Inondazione → bloccato
+    (6,  {"skip": True}),             # Virus    → salta turno
+    (9,  {"skip": True}),             # Traffico → fermo
+    (7,  {"move": -3}),               # Golpe    → indietro 3
+    (2,  {"move": -1}),               # Libia    → indietro 1
+    (13, {"cash_abs": -10}),          # Gas      → paga 10
+    (14, {"cash_abs": -10}),          # Grano    → paga 10
 ]
 
+IMPREVISTO_RICH = [
+    (5,  {"cash_pct": -0.10}),        # Goldman  → perde 10%
+    (10, {"cash_pct": -0.10}),        # TARI     → dai 10%
+    (11, {"candy_per_prop": -1}),     # Energia  → 1/proprietà
+    (1,  {"move": -2}),               # Vulcano  → indietro 2 (lieve)
+    (9,  {"skip": True}),             # Traffico → fermo 1 turno
+]
+
+# ── PROBABILITÀ ─────────────────────────────────────────────────────────────
+PROBABILITA_POOR = [
+    (2, {"move": 2}),                 # Protezione internaz. → avanza 2
+    (6, {"move": 3}),                 # Borsa di studio → avanza 3
+    (1, {"move": 2}),                 # Pioggia PM10 → avanza 2
+    (0, {}),                          # sfida narrativa (neutro)
+    (3, {}),                          # Gates WC (neutro)
+]
+
+PROBABILITA_RICH = [
+    (0, {}),                          # sfida narrativa
+    (3, {}),                          # Gates WC
+    (4, {}),                          # Banca
+    (5, {}),                          # Borsa (sfida)
+    (7, {}),                          # Colloquio
+    (8, {}),                          # Atletica
+    (9, {}),                          # Avvocato
+]
+
+
+def _is_rich(player):
+    """True if this player is at or above the median cash of all players."""
+    sorted_cash = sorted(p.cash for p in set_board.players)
+    n = len(sorted_cash)
+    if n % 2 == 1:
+        median = sorted_cash[n // 2]
+    else:
+        median = (sorted_cash[n // 2 - 1] + sorted_cash[n // 2]) / 2
+    return player.cash >= median
+
+
+def _pick_imprevisto(player):
+    """Return (card_text_index, effect_dict) based on player wealth."""
+    pool = IMPREVISTO_RICH if _is_rich(player) else IMPREVISTO_POOR
+    return random.choice(pool)
+
+
+def _pick_probabilita(player):
+    """Return (card_text_index, effect_dict) based on player wealth."""
+    pool = PROBABILITA_RICH if _is_rich(player) else PROBABILITA_POOR
+    return random.choice(pool)
+
+
+# Legacy flat lists (kept for safety, not used for card drawing anymore)
+IMPREVISTO_EFFECTS = [ef for _, ef in IMPREVISTO_POOR]
 PROBABILITA_EFFECTS = [
-    {},                               # 0 – sfida narrativa
-    {"move": 2},                      # 1 – Pioggia PM10, avanza 2
-    {"move": 2},                      # 2 – Protezione internazionale
-    {},                               # 3 – Gates WC, sfida
-    {},                               # 4 – Banca, sfida
-    {},                               # 5 – Borsa, sfida
-    {"move": 3},                      # 6 – Borsa di studio, avanza 3
-    {},                               # 7 – Colloquio, sfida
-    {},                               # 8 – Atletica, sfida
-    {},                               # 9 – Avvocato, sfida
+    {},
+    {"move": 2},
+    {"move": 2},
+    {},
+    {},
+    {},
+    {"move": 3},
+    {},
+    {},
+    {},
 ]
 
 
@@ -524,7 +595,7 @@ async def _animate_jail(player):
     bs     = set_board.board_size
     screen = set_board.screen
 
-    # --- Phase 1: red flash ---
+    # --- Phase 1: red flash (player already at pos 10) ---
     for i in range(6):
         _base_redraw(player)
         if i % 2 == 0:
@@ -533,6 +604,10 @@ async def _animate_jail(player):
             screen.blit(flash, (bx, by))
         pygame.display.update()
         await asyncio.sleep(0.07)
+    # Show token clearly at jail before bars descend
+    _base_redraw(player)
+    pygame.display.update()
+    await asyncio.sleep(0.2)
 
     # --- Phase 2: bars slide down ---
     bar_color      = (30, 30, 35)
@@ -628,22 +703,28 @@ async def move_player(player):
                 player.cash -= cell.rent
 
         case classi.Imprevisto:
-            idx  = random.randint(0, len(set_board.imprevisti) - 1)
+            # Pick card from the wealth-appropriate pool
+            idx, effect = _pick_imprevisto(player)
             card = set_board.imprevisti[idx]
-            effect_msg = _apply_card_effect(player, IMPREVISTO_EFFECTS[idx])
+            tier_label = "🤑 RICCO" if _is_rich(player) else "💀 POVERO"
+            effect_msg = _apply_card_effect(player, effect)
             body = card + (f"  [ {effect_msg} ]" if effect_msg else "")
-            await draw_overlay_card("IMPREVISTO", body, accent=(200, 65, 40), icon_txt='?!')
+            await draw_overlay_card(f"IMPREVISTO  {tier_label}", body,
+                                    accent=(200, 65, 40), icon_txt='?!')
             _base_redraw(player)
             pygame.display.update()
             if player.jail:
                 await _animate_jail(player)
 
         case classi.Probabilita:
-            idx  = random.randint(0, len(set_board.probabilita) - 1)
+            # Pick card from the wealth-appropriate pool
+            idx, effect = _pick_probabilita(player)
             card = set_board.probabilita[idx]
-            effect_msg = _apply_card_effect(player, PROBABILITA_EFFECTS[idx])
+            tier_label = "🤑 RICCO" if _is_rich(player) else "💀 POVERO"
+            effect_msg = _apply_card_effect(player, effect)
             body = card + (f"  [ {effect_msg} ]" if effect_msg else "")
-            await draw_overlay_card("PROBABILITA'", body, accent=(50, 110, 210), icon_txt='>>')
+            await draw_overlay_card(f"PROBABILITA'  {tier_label}", body,
+                                    accent=(50, 110, 210), icon_txt='>>')
             _base_redraw(player)
             pygame.display.update()
             if player.jail:
@@ -655,10 +736,12 @@ async def move_player(player):
                               accent=(160, 50, 50), icon_txt='$$')
 
         case classi.Jail:
+            # Move token to jail cell BEFORE any redraw so it appears there
+            player.position = 10
             player.jail = True
-            player.position = 10   # sposta fisicamente alla cella prigione
             _base_redraw(player)
             pygame.display.update()
+            await asyncio.sleep(0.3)   # brief pause so player sees the move
             await _animate_jail(player)
 
         case _:
