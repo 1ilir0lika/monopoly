@@ -218,30 +218,29 @@ function show_infobox() {
         div.thick_border { border: 4px solid black; }
 
         /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+        /* average size of droid screen 470dp x 320dp  */
         canvas.emscripten {
             border: 0px none;
             background-color: transparent;
+            width: 100%;
+            height: 100%;
             z-index: 5;
+
             padding: 0;
-            margin: 0;
-            position: static;
-            width: min(100vw, 177.78vh) !important;
-            height: min(100vh, 56.25vw) !important;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
+            margin: 0 auto;
+
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
         }
 
         body {
             font-family: arial;
             margin: 0;
-            padding: 0;
-            background-color: #004d1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
+            padding: none;
+            background-color:powderblue;
         }
 
         .topright{
